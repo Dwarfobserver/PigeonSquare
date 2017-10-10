@@ -17,7 +17,7 @@ Les fonctions qui permettent de créer, modifier et supprimer un sprite via un h
 
  - World :
 
-Cette classe répertorie tous les pigeons, elle fait office de communicateur. Les fonctions déclenchées la fenêtre (lors d'inputs) envoient un message à chaque pigeon. Les pigeons peuvent également signaler à World lorsqu'ils ont atteint un pain, afin d'indiquer à tous les pigeons que le pain a été mangé (s'il s'agit bien du premier appel à la fonction pour un pain donné).
+Cette classe répertorie tous les pigeons, elle fait office de communicateur. Les fonctions déclenchées la fenêtre (lors d'inputs) envoient un message à chaque pigeon. Les pigeons peuvent également signaler à World lorsqu'ils ont atteint un pain, afin d'indiquer à tous les pigeons que le pain a été mangé (s'il s'agit bien du premier appel à la fonction pour un pain donné). Toutes les fonctions de World sont synchronisées sur un unique mutex (une seule s'exécute à la fois).
 
  - Pigeon :
 
