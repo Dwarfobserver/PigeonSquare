@@ -3,19 +3,17 @@
 #include "World.hpp"
 
 
-void Window::start(sf::Vector2u const& size, World& world) {
+void Window::run(World& world, sf::Vector2u const& size) {
     pWorld = &world;
-    run([this, size] {
-        window.create({size.x, size.y}, "Pigeon Square - C++14 & SFML");
-        window.setVerticalSyncEnabled(true);
+    window.create({size.x, size.y}, "Pigeon Square - C++14 & SFML");
+    window.setVerticalSyncEnabled(true);
 
-        while (!mustStop())
-        {
-            spriteTasks.consume();
-            draw();
-            handleInputs();
-        }
-    });
+    while (window.isOpen())
+    {
+        spriteTasks.consume();
+        draw();
+        handleInputs();
+    }
 }
 
 void Window::addTexture(std::string const &name, std::string const &file) {
@@ -96,7 +94,6 @@ void Window::handleInputs() {
     {
         if (event.type == sf::Event::Closed) {
             window.close();
-            stop();
         }
         else if (event.type == sf::Event::MouseButtonReleased) {
             sf::Vector2f pos = {

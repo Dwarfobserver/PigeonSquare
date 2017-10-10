@@ -17,6 +17,7 @@ struct PigeonConfig {
     float sleepDelay;
     float speed;
     float fleeRadius;
+    float fleeRange;
     float refreshRate;
     mutable int randomSeed;
 };

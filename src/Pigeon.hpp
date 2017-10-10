@@ -41,6 +41,7 @@ private:
 
     // Returns true if the state is finished
     std::function<bool()> state;
+    bool isFleeing;
 
     mutable int randomSeed;
 

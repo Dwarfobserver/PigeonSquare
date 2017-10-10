@@ -13,7 +13,7 @@ int main() {
     Window window; // Store textures, maintain and draw sprites, receive inputs
     World world;   // Dispatch events to pigeons
 
-    std::vector<Pigeon> pigeons(15);
+    std::vector<Pigeon> pigeons(150);
 
     PigeonConfig config;
     config.pWindow = &window;
@@ -21,7 +21,8 @@ int main() {
     config.area = {1400, 800};       // Screen size, where pigeons navigate
     config.sleepDelay = 1.5f;        // Delay between bread
     config.speed = 100.f;            // In pixels per second
-    config.fleeRadius = 300.f;       // Range under which pigeons react to right click
+    config.fleeRadius = 250.f;       // Range under which pigeons react to right click
+    config.fleeRange = 500.f;        // Maximum range near right click within pigeons flee
     config.randomSeed = 456'789'123; // Incremented at each pigeon start for convenience
     config.refreshRate = 60.f;       // Number of pigeons update by second
 
@@ -31,10 +32,11 @@ int main() {
 
     world.create(window);
     for (auto& p : pigeons) p.start(config);
-    window.start(config.area, world);
+
+    // Blocking call (window must be executed in main thread in OSX)
+    window.run(world, config.area);
 
     // Stop application when the window stop running
-    window.join();
     for (auto& p : pigeons) p.stop();
     for (auto& p : pigeons) p.join();
 

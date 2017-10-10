@@ -9,20 +9,19 @@
 
 #include <SFML/Graphics.hpp>
 
-#include "Runnable.hpp"
 #include "Commons.hpp"
 
 
 class World;
 
-class Window : public Runnable {
+class Window {
     struct SpriteSorter {
         bool operator()(sf::Sprite* s1, sf::Sprite* s2) {
             return s1->getPosition().y < s2->getPosition().y;
         }
     };
 public:
-    void start(sf::Vector2u const& size, World& world);
+    void run(World& world, sf::Vector2u const& size);
 
     void addTexture(std::string const& name, std::string const& file);
 
