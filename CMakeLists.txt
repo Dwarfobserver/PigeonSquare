@@ -5,9 +5,9 @@ set(EXE_NAME PigeonSquare)
 
 project(${EXE_NAME})
 
-set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD 14)
 
-# Set OS-specific dependencies
+# Set OS-specific folders
 
 if(WIN32)
     set(DEPENDENCIES_DIR "${CMAKE_SOURCE_DIR}/dependencies/windows")
@@ -21,16 +21,17 @@ endif()
 
 # Add source files
 
-set(SOURCE_FILES
-        main.cpp)
+set(SOURCE_FILES src/main.cpp
+        src/Window.cpp src/Window.hpp
+        src/Pigeon.cpp src/Pigeon.hpp src/PigeonConfig.hpp src/World.cpp src/World.hpp src/Bread.hpp src/WorldConfig.hpp src/Runnable.cpp src/Runnable.hpp)
 
 add_executable(PigeonSquare ${SOURCE_FILES})
 
 # Link SFML
 
+set(CMAKE_MODULE_PATH "${DEPENDENCIES_DIR}/SFML/cmake/Modules" ${CMAKE_MODULE_PATH})
 set(SFML_ROOT "${DEPENDENCIES_DIR}/SFML")
 
-set(CMAKE_MODULE_PATH "${DEPENDENCIES_DIR}/SFML/cmake/Modules" ${CMAKE_MODULE_PATH})
 find_package(SFML 2.4 REQUIRED system window graphics)
 
 include_directories(${SFML_INCLUDE_DIR})
