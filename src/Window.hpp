@@ -10,19 +10,17 @@
 #include <SFML/Graphics.hpp>
 
 #include "Runnable.hpp"
+#include "Commons.hpp"
 
 
 class World;
 
 class Window : public Runnable {
-    using lock_t = std::lock_guard<std::mutex>;
-
     struct SpriteSorter {
         bool operator()(sf::Sprite* s1, sf::Sprite* s2) {
             return s1->getPosition().y < s2->getPosition().y;
         }
     };
-    std::function<void(sf::Sprite*)> eraseInMultiset;
 public:
     void start(sf::Vector2u const& size, World& world);
 
@@ -37,14 +35,15 @@ private:
 
     std::map<std::string, sf::Texture> textures;
 
+    TaskQueue spriteTasks;
+
     std::map<int, sf::Sprite> sprites;
     int nextSpriteId;
     std::multiset<sf::Sprite*, SpriteSorter> sortedSprites;
 
-    std::queue<std::function<void()>> spritesTasks;
-    std::mutex spritesMutex;
+    void setSpritePosition(sf::Sprite& sprite, sf::Vector2f const& pos);
+    void eraseInMultiset(sf::Sprite* pSprite);
 
-    void update();
     void draw();
     void handleInputs();
 };

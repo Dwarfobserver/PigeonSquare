@@ -8,43 +8,27 @@
 
 using namespace std::chrono;
 
+int Pigeon::nextId{0};
 
 void Pigeon::start(PigeonConfig const& pigeonConfig) {
     config = pigeonConfig;
     randomSeed = pigeonConfig.randomSeed++;
     run([this] {
-        refreshTime = 1.f / config.refreshRate;
         config.pWorld->onPigeonStarted(*this);
         position = genPosition();
         spriteId = config.pWindow->addSprite("pigeon", position);
 
+        state = [] { return true; };
+
         while (!mustStop()) {
             auto timeBeginUpdate = high_resolution_clock::now();
 
-            // Get target
-            sf::Vector2f target;
-            {
-                lock_t lock {targetMutex};
-                target = this->target;
-            }
-
-            // Move towards target
-            sf::Vector2f diff = target - position;
-            float diffLength = std::sqrt(diff.x * diff.x + diff.y * diff.y);
-            if (diffLength < refreshTime * config.speed) {
-                setPosition(target);
-                if (chasingBread) {
-                    config.pWorld->onBreadEaten(*this, bread);
-                }
-            }
-            else {
-                sf::Vector2f shift = (diff / diffLength) * refreshTime * config.speed;
-                move(shift);
-            }
+            if (state()) state = [] { return true; };
+            eventTasks.consume();
 
             // Respect refresh rate
             auto timeEndUpdate = high_resolution_clock::now() - timeBeginUpdate;
-            std::this_thread::sleep_for(std::chrono::duration<float>(refreshTime) - timeEndUpdate);
+            std::this_thread::sleep_for(duration<float>(1.f / config.refreshRate) - timeEndUpdate);
         }
         config.pWindow->removeSprite(spriteId);
         config.pWorld->onPigeonStopped(*this);
@@ -52,33 +36,70 @@ void Pigeon::start(PigeonConfig const& pigeonConfig) {
 }
 
 void Pigeon::onBreadEaten(Pigeon const &eater) {
-    if (&eater == this) {
-        ++score;
-    }
-    lock_t lock {targetMutex};
 
-    target = genPosition();
-    chasingBread = false;
+    eventTasks.enqueue([this, pEater = &eater] {
+        if (this == pEater) { ++score; }
+
+        auto target = genPosition();
+        auto beginTime = high_resolution_clock::now();
+
+        state = [this, target, beginTime] {
+            // Wait
+            if (high_resolution_clock::now() - beginTime < duration<float>(config.sleepDelay)) {
+                return false;
+            }
+            // Go to sleep
+            return move(target);
+        };
+    });
 }
 
 void Pigeon::onBreadCreated(Bread const &bread) {
-    lock_t lock {targetMutex};
 
-    target = bread.position;
-    this->bread = bread;
-    chasingBread = true;
+    eventTasks.enqueue([this, bread] {
+
+        state = [this, bread] {
+            // Eat bread
+            if (move(bread.position)) {
+                config.pWorld->onBreadEaten(*this, bread);
+                return true;
+            }
+            // Go to bread
+            else return false;
+        };
+    });
 }
 
-void Pigeon::onRockLaunched(sf::Vector2f position) {
-    lock_t lock {targetMutex};
+void Pigeon::onRockLaunched(sf::Vector2f const& position) {
 
-    target = genPosition();
-    chasingBread = false;
+    eventTasks.enqueue([this, position] {
+
+        auto diffLength = length(this->position - position);
+        if (diffLength < config.fleeRadius) {
+
+            auto target = genPosition();
+
+            state = [this, target] {
+                // Flee to target
+                return move(target);
+            };
+        }
+    });
 }
 
-void Pigeon::move(sf::Vector2f const &shift) {
-    position += shift;
-    config.pWindow->setSpritePosition(spriteId, position);
+bool Pigeon::move(sf::Vector2f const &target) {
+    sf::Vector2f diff = target - position;
+    float diffLength = length(diff);
+
+    if (diffLength < (1.f / config.refreshRate) * config.speed) {
+        setPosition(target);
+        return true;
+    }
+    else {
+        sf::Vector2f shift = (diff / diffLength) * (1.f / config.refreshRate) * config.speed;
+        setPosition(position + shift);
+        return false;
+    }
 }
 
 void Pigeon::setPosition(sf::Vector2f const &pos) {

@@ -14,9 +14,11 @@ struct PigeonConfig {
     Window* pWindow;
     World* pWorld;
     sf::Vector2u area;
+    float sleepDelay;
     float speed;
-    int refreshRate;
-    mutable int randomSeed; // Changed by pigeon ctor for convenience
+    float fleeRadius;
+    float refreshRate;
+    mutable int randomSeed;
 };
 
 

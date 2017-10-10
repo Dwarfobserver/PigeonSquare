@@ -7,22 +7,24 @@
 #include <set>
 #include <atomic>
 
-#include "Bread.hpp"
-#include "WorldConfig.hpp"
+#include <SFML/System.hpp>
+
+#include "Commons.hpp"
 
 
 class Pigeon;
 class Window;
 
 class World {
-    using lock_t = std::lock_guard<std::mutex>;
 public:
     void create(Window& window);
 
+    // Events from pigeons
     void onPigeonStarted(Pigeon& pigeon);
     void onPigeonStopped(Pigeon& pigeon);
     void onBreadEaten(Pigeon &pigeon, Bread const &bread);
 
+    // Inputs actions
     void createBread(sf::Vector2f const& position);
     void launchRock(sf::Vector2f const& position);
 private:

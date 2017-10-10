@@ -9,22 +9,9 @@ void Window::start(sf::Vector2u const& size, World& world) {
         window.create({size.x, size.y}, "Pigeon Square - C++14 & SFML");
         window.setVerticalSyncEnabled(true);
 
-        eraseInMultiset = [this] (sf::Sprite* pSprite) {
-            auto it = sortedSprites.find(pSprite);
-            while (it != sortedSprites.end()) {
-                if (*it == pSprite) {
-                    auto it_copy = it;
-                    ++it_copy;
-                    sortedSprites.erase(it, it_copy);
-                    it = sortedSprites.end();
-                }
-                else ++it;
-            }
-        };
-
         while (!mustStop())
         {
-            update();
+            spriteTasks.consume();
             draw();
             handleInputs();
         }
@@ -32,56 +19,64 @@ void Window::start(sf::Vector2u const& size, World& world) {
 }
 
 void Window::addTexture(std::string const &name, std::string const &file) {
-    lock_t lock {spritesMutex};
 
-    spritesTasks.emplace([this, name, file] {
+    spriteTasks.enqueue([this, name, file] {
         textures[name].loadFromFile("../../" + file);
     });
 }
 
 int Window::addSprite(std::string const &textureName, sf::Vector2f const &pos) {
-    lock_t lock {spritesMutex};
-
     int id = nextSpriteId++;
-    spritesTasks.emplace([this, id, textureName, pos] {
+
+    spriteTasks.enqueue([this, id, textureName, pos] {
         auto& sprite = sprites[id];
 
         auto const& texture = textures.at(textureName);
         sprite.setTexture(texture);
-        sprite.setPosition(pos);
+        setSpritePosition(sprite, pos);
         sortedSprites.insert(&sprite);
     });
     return id;
 }
 
 void Window::setSpritePosition(int spriteId, sf::Vector2f const &pos) {
-    lock_t lock {spritesMutex};
 
-    spritesTasks.emplace([this, id = spriteId, pos] {
+    spriteTasks.enqueue([this, id = spriteId, pos] {
         auto& sprite = sprites[id];
 
         eraseInMultiset(&sprite);
-        sprite.setPosition(pos);
+        setSpritePosition(sprite, pos);
         sortedSprites.insert(&sprite);
     });
 }
 
 void Window::removeSprite(int spriteId) {
-    lock_t lock {spritesMutex};
 
-    spritesTasks.emplace([this, id = spriteId] {
+    spriteTasks.enqueue([this, id = spriteId] {
         eraseInMultiset(&sprites[id]);
         sprites.erase(id);
     });
 }
 
+void Window::setSpritePosition(sf::Sprite &sprite, sf::Vector2f const &pos) {
+    auto size = sf::Vector2f {
+            static_cast<float>(sprite.getTextureRect().width),
+            static_cast<float>(sprite.getTextureRect().height)
+    };
+    sprite.setPosition(pos - size / 2.f);
+}
 
-void Window::update() {
-    lock_t lock {spritesMutex};
+void Window::eraseInMultiset(sf::Sprite *pSprite) {
 
-    while (!spritesTasks.empty()) {
-        spritesTasks.front()();
-        spritesTasks.pop();
+    auto it = sortedSprites.find(pSprite);
+    while (it != sortedSprites.end()) {
+        if (*it == pSprite) {
+            auto it_copy = it;
+            ++it_copy;
+            sortedSprites.erase(it, it_copy);
+            it = sortedSprites.end();
+        }
+        else ++it;
     }
 }
 

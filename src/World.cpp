@@ -1,12 +1,8 @@
-//
-// Created on 09/10/2017.
-//
 
 #include "World.hpp"
 
 #include "Pigeon.hpp"
 #include "Window.hpp"
-
 
 
 void World::create(Window& window) {
@@ -30,6 +26,8 @@ void World::onBreadEaten(Pigeon &pigeon, Bread const &bread) {
     lock_t lock {pigeonsMutex};
 
     if (!validBread.load() || bread.id != this->bread.id) return;
+
+    std::cout << "pigeon " << pigeon.id << " ate " << pigeon.getScore() + 1 << " breads\n";
 
     validBread.store(false);
     pWindow->removeSprite(bread.id);

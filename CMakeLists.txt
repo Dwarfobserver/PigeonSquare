@@ -23,7 +23,11 @@ endif()
 
 set(SOURCE_FILES src/main.cpp
         src/Window.cpp src/Window.hpp
-        src/Pigeon.cpp src/Pigeon.hpp src/PigeonConfig.hpp src/World.cpp src/World.hpp src/Bread.hpp src/WorldConfig.hpp src/Runnable.cpp src/Runnable.hpp)
+        src/Pigeon.cpp src/Pigeon.hpp
+        src/PigeonConfig.hpp
+        src/World.cpp src/World.hpp
+        src/Runnable.cpp src/Runnable.hpp
+        src/Commons.hpp)
 
 add_executable(PigeonSquare ${SOURCE_FILES})
 
