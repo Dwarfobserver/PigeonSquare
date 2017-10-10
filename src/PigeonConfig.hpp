@@ -13,11 +13,10 @@ class World;
 struct PigeonConfig {
     Window* pWindow;
     World* pWorld;
-    std::string textureName;
     sf::Vector2u area;
     float speed;
     int refreshRate;
-    mutable int randomSeed{123456}; // Changed by pigeon ctor for convenience
+    mutable int randomSeed; // Changed by pigeon ctor for convenience
 };
 
 

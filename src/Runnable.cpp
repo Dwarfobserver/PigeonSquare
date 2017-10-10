@@ -2,6 +2,11 @@
 #include "Runnable.hpp"
 
 
+void Runnable::join() {
+    while (!isDone()) {}
+    thread.join();
+}
+
 void Runnable::run(std::function<void()> task) {
     if (!done.load()) throw std::runtime_error {"Tried to start a running runnable"};
 

@@ -6,27 +6,38 @@
 
 #include <SFML/System.hpp>
 #include <atomic>
+#include <mutex>
 
 #include "PigeonConfig.hpp"
 #include "Runnable.hpp"
+#include "Bread.hpp"
 
 
 class Pigeon : public Runnable {
+    using lock_t = std::lock_guard<std::mutex>;
 public:
-    explicit Pigeon(PigeonConfig const& config);
+    void start(PigeonConfig const& config);
 
-    void start();
-    int getScore() const;
-    void onBreadEaten();
+    int getScore() const { return score.load(); }
 
-    const PigeonConfig config;
+    void onBreadEaten(Pigeon const& eater);
+    void onBreadCreated(Bread const& bread);
+    void onRockLaunched(sf::Vector2f position);
 private:
+    PigeonConfig config;
     float refreshTime;
 
     sf::Vector2f position;
     int spriteId;
-
     std::atomic_int score;
+
+    sf::Vector2f target;
+    Bread bread;
+    bool chasingBread;
+    std::mutex targetMutex;
+
+    void move(sf::Vector2f const& shift);
+    void setPosition(sf::Vector2f const& pos);
 
     mutable int randomSeed;
 

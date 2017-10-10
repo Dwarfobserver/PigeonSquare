@@ -1,11 +1,26 @@
 
 #include "Window.hpp"
+#include "World.hpp"
 
 
-void Window::start(sf::Vector2u const& size) {
+void Window::start(sf::Vector2u const& size, World& world) {
+    pWorld = &world;
     run([this, size] {
         window.create({size.x, size.y}, "Pigeon Square - C++14 & SFML");
         window.setVerticalSyncEnabled(true);
+
+        eraseInMultiset = [this] (sf::Sprite* pSprite) {
+            auto it = sortedSprites.find(pSprite);
+            while (it != sortedSprites.end()) {
+                if (*it == pSprite) {
+                    auto it_copy = it;
+                    ++it_copy;
+                    sortedSprites.erase(it, it_copy);
+                    it = sortedSprites.end();
+                }
+                else ++it;
+            }
+        };
 
         while (!mustStop())
         {
@@ -45,7 +60,7 @@ void Window::setSpritePosition(int spriteId, sf::Vector2f const &pos) {
     spritesTasks.emplace([this, id = spriteId, pos] {
         auto& sprite = sprites[id];
 
-        sortedSprites.erase(&sprite);
+        eraseInMultiset(&sprite);
         sprite.setPosition(pos);
         sortedSprites.insert(&sprite);
     });
@@ -55,7 +70,7 @@ void Window::removeSprite(int spriteId) {
     lock_t lock {spritesMutex};
 
     spritesTasks.emplace([this, id = spriteId] {
-        sortedSprites.erase(&sprites[id]);
+        eraseInMultiset(&sprites[id]);
         sprites.erase(id);
     });
 }
@@ -87,6 +102,18 @@ void Window::handleInputs() {
         if (event.type == sf::Event::Closed) {
             window.close();
             stop();
+        }
+        else if (event.type == sf::Event::MouseButtonReleased) {
+            sf::Vector2f pos = {
+                    static_cast<float>(event.mouseButton.x),
+                    static_cast<float>(event.mouseButton.y)
+            };
+            if (event.mouseButton.button == sf::Mouse::Button::Left) {
+                pWorld->createBread(pos);
+            }
+            else if (event.mouseButton.button == sf::Mouse::Button::Right) {
+                pWorld->launchRock(pos);
+            }
         }
     }
 }

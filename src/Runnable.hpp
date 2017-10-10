@@ -10,13 +10,12 @@
 
 class Runnable {
 public:
+    Runnable() : done(true), stopSignal(false) {}
+
     void stop() { stopSignal.store(true); }
     bool mustStop() const { return stopSignal.load(); }
     bool isDone() const { return done.load(); }
-    void join() { while (!isDone()) {} thread.join(); }
-
-    Runnable() : done(true), stopSignal(false) {}
-    virtual ~Runnable() = default;
+    void join();
 protected:
     void run(std::function<void()> task);
 private:

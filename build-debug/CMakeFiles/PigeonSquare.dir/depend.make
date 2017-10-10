@@ -155,9 +155,12 @@ CMakeFiles/PigeonSquare.dir/src/Window.cpp.obj: ../dependencies/windows/SFML/inc
 CMakeFiles/PigeonSquare.dir/src/Window.cpp.obj: ../dependencies/windows/SFML/include/SFML/Window/Window.hpp
 CMakeFiles/PigeonSquare.dir/src/Window.cpp.obj: ../dependencies/windows/SFML/include/SFML/Window/WindowHandle.hpp
 CMakeFiles/PigeonSquare.dir/src/Window.cpp.obj: ../dependencies/windows/SFML/include/SFML/Window/WindowStyle.hpp
+CMakeFiles/PigeonSquare.dir/src/Window.cpp.obj: ../src/Bread.hpp
 CMakeFiles/PigeonSquare.dir/src/Window.cpp.obj: ../src/Runnable.hpp
 CMakeFiles/PigeonSquare.dir/src/Window.cpp.obj: ../src/Window.cpp
 CMakeFiles/PigeonSquare.dir/src/Window.cpp.obj: ../src/Window.hpp
+CMakeFiles/PigeonSquare.dir/src/Window.cpp.obj: ../src/World.hpp
+CMakeFiles/PigeonSquare.dir/src/Window.cpp.obj: ../src/WorldConfig.hpp
 
 CMakeFiles/PigeonSquare.dir/src/World.cpp.obj: ../dependencies/windows/SFML/include/SFML/Config.hpp
 CMakeFiles/PigeonSquare.dir/src/World.cpp.obj: ../dependencies/windows/SFML/include/SFML/Graphics.hpp

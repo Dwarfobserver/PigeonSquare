@@ -12,6 +12,8 @@
 #include "Runnable.hpp"
 
 
+class World;
+
 class Window : public Runnable {
     using lock_t = std::lock_guard<std::mutex>;
 
@@ -20,8 +22,9 @@ class Window : public Runnable {
             return s1->getPosition().y < s2->getPosition().y;
         }
     };
+    std::function<void(sf::Sprite*)> eraseInMultiset;
 public:
-    void start(sf::Vector2u const& size);
+    void start(sf::Vector2u const& size, World& world);
 
     void addTexture(std::string const& name, std::string const& file);
 
@@ -30,12 +33,13 @@ public:
     void removeSprite(int spriteId);
 private:
     sf::RenderWindow window;
+    World* pWorld;
 
     std::map<std::string, sf::Texture> textures;
 
     std::map<int, sf::Sprite> sprites;
     int nextSpriteId;
-    std::set<sf::Sprite*, SpriteSorter> sortedSprites;
+    std::multiset<sf::Sprite*, SpriteSorter> sortedSprites;
 
     std::queue<std::function<void()>> spritesTasks;
     std::mutex spritesMutex;

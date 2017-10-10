@@ -17,15 +17,16 @@ class Window;
 class World {
     using lock_t = std::lock_guard<std::mutex>;
 public:
-    void create(WorldConfig const& config);
+    void create(Window& window);
 
     void onPigeonStarted(Pigeon& pigeon);
     void onPigeonStopped(Pigeon& pigeon);
+    void onBreadEaten(Pigeon &pigeon, Bread const &bread);
 
     void createBread(sf::Vector2f const& position);
-    void eatBread(Pigeon& pigeon, Bread const& bread);
+    void launchRock(sf::Vector2f const& position);
 private:
-    WorldConfig config;
+    Window* pWindow;
 
     std::set<Pigeon*> pigeons;
     mutable std::mutex pigeonsMutex;

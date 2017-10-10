@@ -12,40 +12,27 @@
 int main() {
     Window window;
     World world;
+    std::vector<Pigeon> pigeons(50);
 
-    WorldConfig worldConfig;
+    PigeonConfig config;
+    config.pWindow = &window;
+    config.pWorld = &world;
+    config.area = {800, 600};
+    config.speed = 100.f;
+    config.randomSeed = 123478;
+    config.refreshRate = 60;
 
-    worldConfig.pWindow = &window;
-    worldConfig.breadTextureName = "bread";
-    worldConfig.breadExpiredTextureName = "bread expired";
+    window.addTexture("pigeon", "images/pigeon.png");
+    window.addTexture("bread", "images/bread.png");
+    window.addTexture("bread expired", "images/bread expired.png");
 
-    PigeonConfig pigeonConfig;
+    world.create(window);
+    for (auto& p : pigeons) p.start(config);
+    window.start(config.area, world);
 
-    pigeonConfig.pWindow = &window;
-    pigeonConfig.pWorld = &world;
-    pigeonConfig.area = {800, 600};
-    pigeonConfig.textureName = "pigeon";
-    pigeonConfig.speed = 100.f;
-    pigeonConfig.randomSeed = 123478;
-    pigeonConfig.refreshRate = 60;
-
-    window.addTexture(pigeonConfig.textureName, "images/pigeon.png");
-    window.addTexture(worldConfig.breadTextureName, "images/bread.png");
-    window.addTexture(worldConfig.breadExpiredTextureName, "images/bread expired.png");
-
-    Pigeon p1(pigeonConfig);
-
-    window.start(pigeonConfig.area);
-    while (window.isDone()) {}
-
-    p1.start();
-
-    window.addSprite("bread", {450, 120});
-    
     window.join();
-
-    p1.stop();
-    p1.join();
+    for (auto& p : pigeons) p.stop();
+    for (auto& p : pigeons) p.join();
 
     return 0;
 }
