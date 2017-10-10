@@ -27,7 +27,13 @@ void World::onBreadEaten(Pigeon &pigeon, Bread const &bread) {
 
     if (!validBread.load() || bread.id != this->bread.id) return;
 
-    std::cout << "pigeon " << pigeon.id << " ate " << pigeon.getScore() + 1 << " breads\n";
+    std::cout << "pigeon " << pigeon.id << " ate ";
+    if (pigeon.getScore() == 0) {
+        std::cout << "his first bread\n";
+    }
+    else {
+        std::cout << pigeon.getScore() + 1 << " breads\n";
+    }
 
     validBread.store(false);
     pWindow->removeSprite(bread.id);
