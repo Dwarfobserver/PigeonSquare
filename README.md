@@ -5,6 +5,8 @@ TP orienté sur la programmation concurrente.
 Le but est de visualiser des pigeons, chacun géré depuis un thread séparé.
 On peut nourrir ces pigeons ou les effrayer en cliquant sur la fenêtre.
 
+Actuellement, l'application supporte plusieurs milliers de pigeons à un taux de rafraîchissement de 60 (selon la machine de l'utilisateur).
+
 ### Utilisation
 
 Le TP supporte OSX et Windows.
