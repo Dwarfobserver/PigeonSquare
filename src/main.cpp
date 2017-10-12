@@ -13,7 +13,7 @@ int main() {
     Window window; // Store textures, maintain and draw sprites, receive inputs
     World world;   // Dispatch events to pigeons
 
-    std::vector<Pigeon> pigeons(30);
+    std::vector<Pigeon> pigeons(5'000);
 
     PigeonConfig config;
     config.pWindow = &window;

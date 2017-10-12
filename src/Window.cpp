@@ -11,6 +11,9 @@ void Window::run(World& world, sf::Vector2u const& size) {
     while (window.isOpen())
     {
         spriteTasks.consume();
+        std::stable_sort(sortedSprites.begin(), sortedSprites.end(), [] (sf::Sprite* s1, sf::Sprite* s2) {
+            return s1->getPosition().y < s2->getPosition().y;
+        });
         draw();
         handleInputs();
     }
@@ -32,7 +35,7 @@ int Window::addSprite(std::string const &textureName, sf::Vector2f const &pos) {
         auto const& texture = textures.at(textureName);
         sprite.setTexture(texture);
         setSpritePosition(sprite, pos);
-        sortedSprites.insert(&sprite);
+        sortedSprites.push_back(&sprite);
     });
     return id;
 }
@@ -41,17 +44,15 @@ void Window::setSpritePosition(int spriteId, sf::Vector2f const &pos) {
 
     spriteTasks.enqueue([this, id = spriteId, pos] {
         auto& sprite = sprites[id];
-
-        eraseInMultiset(&sprite);
         setSpritePosition(sprite, pos);
-        sortedSprites.insert(&sprite);
     });
 }
 
 void Window::removeSprite(int spriteId) {
 
     spriteTasks.enqueue([this, id = spriteId] {
-        eraseInMultiset(&sprites[id]);
+        auto it = std::find(sortedSprites.begin(), sortedSprites.end(), &sprites[id]);
+        sortedSprites.erase(it);
         sprites.erase(id);
     });
 }
@@ -62,20 +63,6 @@ void Window::setSpritePosition(sf::Sprite &sprite, sf::Vector2f const &pos) {
             static_cast<float>(sprite.getTextureRect().height)
     };
     sprite.setPosition(pos - size / 2.f);
-}
-
-void Window::eraseInMultiset(sf::Sprite *pSprite) {
-
-    auto it = sortedSprites.find(pSprite);
-    while (it != sortedSprites.end()) {
-        if (*it == pSprite) {
-            auto it_copy = it;
-            ++it_copy;
-            sortedSprites.erase(it, it_copy);
-            it = sortedSprites.end();
-        }
-        else ++it;
-    }
 }
 
 void Window::draw() {

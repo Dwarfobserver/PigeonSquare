@@ -10,6 +10,7 @@
 #include <SFML/Graphics.hpp>
 
 #include "Commons.hpp"
+#include "PigeonConfig.hpp"
 
 
 class World;
@@ -26,9 +27,11 @@ public:
     void addTexture(std::string const& name, std::string const& file);
 
     int addSprite(std::string const& textureName, sf::Vector2f const& pos);
-    void setSpritePosition(int spriteId, sf::Vector2f const& pos);
     void removeSprite(int spriteId);
+
+    void setSpritePosition(int spriteId, sf::Vector2f const& pos);
 private:
+    PigeonConfig config;
     sf::RenderWindow window;
     World* pWorld;
 
@@ -38,10 +41,9 @@ private:
 
     std::map<int, sf::Sprite> sprites;
     int nextSpriteId;
-    std::multiset<sf::Sprite*, SpriteSorter> sortedSprites;
+    std::vector<sf::Sprite*> sortedSprites;
 
     void setSpritePosition(sf::Sprite& sprite, sf::Vector2f const& pos);
-    void eraseInMultiset(sf::Sprite* pSprite);
 
     void draw();
     void handleInputs();
