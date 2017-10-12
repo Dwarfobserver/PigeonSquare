@@ -5,6 +5,12 @@ TP orienté sur la programmation concurrente.
 Le but est de visualiser des pigeons, chacun géré depuis un thread séparé.
 On peut nourrir ces pigeons ou les effrayer en cliquant sur la fenêtre.
 
+### Utilisation
+
+Le TP supporte OSX et Windows.
+Le build Windows se fait avec cmake.
+Le build Apple se fait en installant SFML avec "brew install SFML", puis avec cmake et make.
+
 ### Structure du programme
 
 Il y a trois classes principales :

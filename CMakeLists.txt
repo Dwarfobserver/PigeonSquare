@@ -34,9 +34,11 @@ add_executable(PigeonSquare ${SOURCE_FILES})
 # Link SFML
 
 set(CMAKE_MODULE_PATH "${DEPENDENCIES_DIR}/SFML/cmake/Modules" ${CMAKE_MODULE_PATH})
-set(SFML_ROOT "${DEPENDENCIES_DIR}/SFML")
+if(WIN32)
+    set(SFML_ROOT "${DEPENDENCIES_DIR}/SFML")
+endif()
 
-find_package(SFML 2.4 REQUIRED system window graphics)
+find_package(SFML 2.4.2 REQUIRED system window graphics)
 
 include_directories(${SFML_INCLUDE_DIR})
 target_link_libraries(${EXE_NAME} ${SFML_LIBRARIES})
