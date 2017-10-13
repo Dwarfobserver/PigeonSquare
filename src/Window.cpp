@@ -3,17 +3,15 @@
 #include "World.hpp"
 
 
-void Window::run(World& world, sf::Vector2u const& size) {
-    pWorld = &world;
-    window.create({size.x, size.y}, "Pigeon Square - C++14 & SFML");
+void Window::run(PigeonConfig const& config) {
+    this->config = config;
+
+    window.create({config.area.x, config.area.y}, "Pigeon Square - C++14 & SFML");
     window.setVerticalSyncEnabled(true);
 
     while (window.isOpen())
     {
-        spriteTasks.consume();
-        std::stable_sort(sortedSprites.begin(), sortedSprites.end(), [] (sf::Sprite* s1, sf::Sprite* s2) {
-            return s1->getPosition().y < s2->getPosition().y;
-        });
+        update();
         draw();
         handleInputs();
     }
@@ -34,18 +32,17 @@ int Window::addSprite(std::string const &textureName, sf::Vector2f const &pos) {
 
         auto const& texture = textures.at(textureName);
         sprite.setTexture(texture);
-        setSpritePosition(sprite, pos);
+        setPosition(sprite, pos);
         sortedSprites.push_back(&sprite);
+
+        spritePositions.emplace(id, pos);
     });
     return id;
 }
 
 void Window::setSpritePosition(int spriteId, sf::Vector2f const &pos) {
-
-    spriteTasks.enqueue([this, id = spriteId, pos] {
-        auto& sprite = sprites[id];
-        setSpritePosition(sprite, pos);
-    });
+    auto& info = spritePositions[spriteId];
+    info.pos[info.lastPos.fetch_xor(1, std::memory_order_relaxed)] = pos;
 }
 
 void Window::removeSprite(int spriteId) {
@@ -54,15 +51,29 @@ void Window::removeSprite(int spriteId) {
         auto it = std::find(sortedSprites.begin(), sortedSprites.end(), &sprites[id]);
         sortedSprites.erase(it);
         sprites.erase(id);
+        spritePositions.erase(id);
     });
 }
 
-void Window::setSpritePosition(sf::Sprite &sprite, sf::Vector2f const &pos) {
+void Window::setPosition(sf::Sprite &sprite, sf::Vector2f const &pos) {
     auto size = sf::Vector2f {
             static_cast<float>(sprite.getTextureRect().width),
             static_cast<float>(sprite.getTextureRect().height)
     };
     sprite.setPosition(pos - size / 2.f);
+}
+
+void Window::update() {
+    spriteTasks.consume();
+
+    for (auto& it : spritePositions) {
+        int i = it.second.lastPos.load(std::memory_order_relaxed);
+        setPosition(sprites[it.first], it.second.pos[i]);
+    }
+
+    std::stable_sort(sortedSprites.begin(), sortedSprites.end(), [] (sf::Sprite* s1, sf::Sprite* s2) {
+        return s1->getPosition().y < s2->getPosition().y;
+    });
 }
 
 void Window::draw() {
@@ -88,10 +99,10 @@ void Window::handleInputs() {
                     static_cast<float>(event.mouseButton.y)
             };
             if (event.mouseButton.button == sf::Mouse::Button::Left) {
-                pWorld->createBread(pos);
+                config.pWorld->createBread(pos);
             }
             else if (event.mouseButton.button == sf::Mouse::Button::Right) {
-                pWorld->launchRock(pos);
+                config.pWorld->launchRock(pos);
             }
         }
     }

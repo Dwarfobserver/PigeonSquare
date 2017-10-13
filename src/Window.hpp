@@ -2,9 +2,10 @@
 #ifndef PIGEONSQUARE_WINDOW_HPP
 #define PIGEONSQUARE_WINDOW_HPP
 
-#include <mutex>
+#include <atomic>
 #include <queue>
 #include <functional>
+#include <unordered_map>
 #include <set>
 
 #include <SFML/Graphics.hpp>
@@ -16,13 +17,16 @@
 class World;
 
 class Window {
-    struct SpriteSorter {
-        bool operator()(sf::Sprite* s1, sf::Sprite* s2) {
-            return s1->getPosition().y < s2->getPosition().y;
-        }
+    struct SpriteInfo {
+        SpriteInfo() {}
+        SpriteInfo(sf::Vector2f const& pos) : lastPos{0}, pos{pos, pos} {}
+
+        // Rocker device to write at the safe place
+        std::atomic_int lastPos;
+        sf::Vector2f pos[2];
     };
 public:
-    void run(World& world, sf::Vector2u const& size);
+    void run(PigeonConfig const& config);
 
     void addTexture(std::string const& name, std::string const& file);
 
@@ -33,18 +37,19 @@ public:
 private:
     PigeonConfig config;
     sf::RenderWindow window;
-    World* pWorld;
 
-    std::map<std::string, sf::Texture> textures;
+    std::unordered_map<std::string, sf::Texture> textures;
+
+    std::map<int, SpriteInfo> spritePositions;
 
     TaskQueue spriteTasks;
-
-    std::map<int, sf::Sprite> sprites;
-    int nextSpriteId;
+    std::unordered_map<int, sf::Sprite> sprites;
+    std::atomic_int nextSpriteId;
     std::vector<sf::Sprite*> sortedSprites;
 
-    void setSpritePosition(sf::Sprite& sprite, sf::Vector2f const& pos);
+    void setPosition(sf::Sprite &sprite, sf::Vector2f const &pos);
 
+    void update();
     void draw();
     void handleInputs();
 };

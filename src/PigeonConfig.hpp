@@ -13,6 +13,7 @@ class World;
 struct PigeonConfig {
     Window* pWindow;
     World* pWorld;
+    int pigeonsCount;
     sf::Vector2u area;
     float sleepDelay;
     float speed;

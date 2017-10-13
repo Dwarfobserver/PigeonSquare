@@ -25,6 +25,7 @@ void Pigeon::start(PigeonConfig const& pigeonConfig) {
             auto timeBeginUpdate = high_resolution_clock::now();
 
             if (state()) state = [] { return true; };
+
             eventTasks.consume();
 
             // Respect refresh rate
