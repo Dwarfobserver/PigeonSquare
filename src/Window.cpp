@@ -56,11 +56,11 @@ void Window::removeSprite(int spriteId) {
 }
 
 void Window::setPosition(sf::Sprite &sprite, sf::Vector2f const &pos) {
-    auto size = sf::Vector2f {
-            static_cast<float>(sprite.getTextureRect().width),
-            static_cast<float>(sprite.getTextureRect().height)
+    auto ajustedPos = sf::Vector2f {
+            pos.x - sprite.getTextureRect().width / 2.f,
+            pos.y - sprite.getTextureRect().height / 2.f
     };
-    sprite.setPosition(pos - size / 2.f);
+    sprite.setPosition(ajustedPos);
 }
 
 void Window::update() {
@@ -72,12 +72,14 @@ void Window::update() {
     }
 
     std::stable_sort(sortedSprites.begin(), sortedSprites.end(), [] (sf::Sprite* s1, sf::Sprite* s2) {
-        return s1->getPosition().y < s2->getPosition().y;
+        auto y1 = s1->getPosition().y + s1->getTextureRect().height;
+        auto y2 = s2->getPosition().y + s2->getTextureRect().height;
+        return y1 < y2;
     });
 }
 
 void Window::draw() {
-    window.clear(sf::Color::Black);
+    window.clear(sf::Color::White);
 
     for (auto pSprite : sortedSprites) {
         window.draw(*pSprite);
